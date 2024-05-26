@@ -27,7 +27,7 @@ fn main() {
 fn handle_list_all_employees_per_department(database: &mut HashMap<String, Vec<String>>) {
     print_header("All employees per department");
     for (department, employees) in database {
-        employees.sort_by(|a, b| a.trim().to_lowercase().cmp(&b.trim().to_lowercase()));
+        employees.sort_by_key(|a| a.trim().to_lowercase());
         employees
             .iter()
             .for_each(|emp| println!("{department}   --   {emp}"));
@@ -41,7 +41,7 @@ fn handle_add_employee(database: &mut HashMap<String, Vec<String>>) {
         let command = get_user_input(
             "Run a command using the following format: \"Add <employee_name> to <department>\"",
         );
-        let words: Vec<&str> = command.trim().split(" ").into_iter().collect();
+        let words = command.trim().split(' ');
         // filter out all empty strings
         let words: Vec<&str> = words.into_iter().filter(|w| !w.trim().is_empty()).collect();
         if words.len() != 4 {
@@ -60,20 +60,16 @@ fn handle_add_employee(database: &mut HashMap<String, Vec<String>>) {
 
 fn handle_list_department_employees(department: &str, database: &HashMap<String, Vec<String>>) {
     print_header("Employees in {department} department");
-
-    match database.get(department) {
-        Some(employees) => {
-            employees.iter().for_each(|e| println!("{}", e));
-        }
-        None => {}
+    if let Some(employees) = database.get(department) {
+        employees.iter().for_each(|e| println!("{}", e));
     }
     enter_any_key();
 }
 
 fn handle_list_all_people(database: &mut HashMap<String, Vec<String>>) {
     print_header("All employees");
-    for (_, employees) in database {
-        employees.sort_by(|a, b| a.trim().to_lowercase().cmp(&b.trim().to_lowercase()));
+    for employees in database.values_mut() {
+        employees.sort_by_key(|a| a.trim().to_lowercase());
         employees.iter().for_each(|emp| println!("{}", emp));
     }
     enter_any_key();
@@ -89,7 +85,7 @@ fn get_user_input(write_line: &str) -> String {
     io::stdin()
         .read_line(&mut user_input)
         .expect("Failed to retrieve user input");
-    if user_input.ends_with("\n") {
+    if user_input.ends_with('\n') {
         user_input[..user_input.len() - 1].to_string()
     } else {
         user_input
@@ -111,7 +107,7 @@ fn print_options() {
 }
 
 fn print_header(header: &str) {
-    let border = format!("======================================");
+    let border = "======================================";
     println!("{}", header);
     println!("{}", border);
 }
